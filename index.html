@@ -144,15 +144,11 @@
         }
 
         console.log('주가 데이터:', stockData);
-        
-        // 테스트용: 결과 확인 alert
-        alert(`검색 성공!\n티커: ${ticker}\n데이터 개수: ${Object.keys(stockData.data).length}개`);
-        resetSearchBtn();
 
-        // TODO: 추후 chart.html 완성 후 주석 해제
-        // sessionStorage.setItem('stockData', JSON.stringify(stockData));
-        // sessionStorage.setItem('originalQuery', query);
-        // window.location.href = `chart.html?ticker=${ticker}`;
+        // 3. 결과 페이지로 이동 (데이터는 sessionStorage에 저장)
+        sessionStorage.setItem('stockData', JSON.stringify(stockData));
+        sessionStorage.setItem('originalQuery', query);
+        window.location.href = `analysis.html?ticker=${ticker}`;
 
       } catch (error) {
         console.error('검색 오류:', error);
