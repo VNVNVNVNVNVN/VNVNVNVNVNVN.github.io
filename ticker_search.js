@@ -5,12 +5,13 @@ const CLAUDE_API_KEY = 'sk-ant-api03-hbkVkNhnG3nhJu3W6tiGOySk1uv8-6STqxmhLPs-DfG
 
 async function searchTicker(userInput) {
   try {
-    const response = await fetch('https://corsproxy.io/?https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': CLAUDE_API_KEY,
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
