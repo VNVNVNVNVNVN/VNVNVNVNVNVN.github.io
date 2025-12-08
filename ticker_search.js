@@ -1,7 +1,7 @@
 // ticker_search.js
 // 사용자 입력(한글/영어/오타)을 Claude API로 티커로 변환
 
-const CLAUDE_API_KEY = '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';
+const CLAUDE_API_KEY = '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';
 
 async function searchTicker(userInput) {
   try {
