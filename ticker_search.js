@@ -5,7 +5,7 @@ const CLAUDE_API_KEY = 'sk-ant-api03-hbkVkNhnG3nhJu3W6tiGOySk1uv8-6STqxmhLPs-DfG
 
 async function searchTicker(userInput) {
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://corsproxy.io/?https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
