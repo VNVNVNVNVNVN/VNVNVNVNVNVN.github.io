@@ -54,15 +54,15 @@
       <!-- 차트 섹션 -->
       <section class="rounded-xl p-6 mb-6" style="background-color: rgba(30, 41, 59, 0.5); border: 1px solid #334155;">
         <!-- 타임프레임 선택 -->
-        <div class="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
-          <button class="px-4 py-2 rounded-lg text-sm font-medium bg-cyan-500 text-white">1분</button>
-          <button class="px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700">5분</button>
-          <button class="px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700">15분</button>
-          <button class="px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700">30분</button>
-          <button class="px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700">1시간</button>
-          <button class="px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700">일봉</button>
-          <button class="px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700">주봉</button>
-          <button class="px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700">월봉</button>
+        <div id="timeframeButtons" class="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
+          <button data-interval="1min" class="timeframe-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700">1분</button>
+          <button data-interval="5min" class="timeframe-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700">5분</button>
+          <button data-interval="15min" class="timeframe-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700">15분</button>
+          <button data-interval="30min" class="timeframe-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700">30분</button>
+          <button data-interval="60min" class="timeframe-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700">1시간</button>
+          <button data-interval="daily" class="timeframe-btn px-4 py-2 rounded-lg text-sm font-medium bg-cyan-500 text-white">일봉</button>
+          <button data-interval="weekly" class="timeframe-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700">주봉</button>
+          <button data-interval="monthly" class="timeframe-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700">월봉</button>
         </div>
         
         <!-- 차트 영역 -->
