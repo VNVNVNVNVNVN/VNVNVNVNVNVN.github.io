@@ -16,12 +16,10 @@
     
     <!-- 헤더 -->
     <header class="flex items-center justify-between px-6 py-4 border-b" style="border-color: #334155;">
-      <!-- 로고 -->
       <a href="index.html" class="text-2xl font-bold tracking-wide">
         <span class="text-white">PL</span><span style="color: #22d3ee;">AI</span><span class="text-gray-500">-</span><span class="text-gray-400">STOCK</span>
       </a>
       
-      <!-- 검색창 -->
       <div class="flex items-center rounded-full px-4 py-2" style="background-color: rgba(30, 41, 59, 0.8); border: 1px solid #334155;">
         <input
           type="text"
@@ -53,7 +51,6 @@
       
       <!-- 차트 섹션 -->
       <section class="rounded-xl p-6 mb-6" style="background-color: rgba(30, 41, 59, 0.5); border: 1px solid #334155;">
-        <!-- 차트 영역 -->
         <div id="chartContainer" class="w-full h-96 rounded-lg flex items-center justify-center" style="background-color: #0f172a;">
           <span class="text-gray-500">차트 로딩 중...</span>
         </div>
@@ -68,12 +65,9 @@
           AI 분석 리포트
         </h2>
         
-        <!-- 분석 카드 그리드 (동적 렌더링) -->
         <div id="analysisGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          <!-- JS에서 동적으로 생성 -->
         </div>
 
-        <!-- 종합 의견 -->
         <div class="rounded-lg p-4" style="background-color: #0f172a;">
           <h3 class="text-cyan-400 font-semibold mb-2">💡 종합 의견</h3>
           <p id="summaryAnalysis" class="text-gray-300">분석 중...</p>
@@ -87,14 +81,20 @@
   <script src="ticker_search.js"></script>
   <script src="alpha_vantage_api_call.js"></script>
   <script>
-    // ===== 분석 카드 설정 (유지보수 용이) =====
+    // ===== 전역 변수 =====
+    let chart = null;
+    let candleSeries = null;
+    let currentTicker = null;
+    let currentStockData = null;
+
+    // ===== 분석 카드 설정 =====
     const ANALYSIS_CARDS = [
-      { id: 'trend', icon: '📈', title: '추세 분석', prompt: '추세 분석을 해줘' },
-      { id: 'candle', icon: '🕯️', title: '캔들 패턴', prompt: '캔들 패턴을 분석해줘' },
-      { id: 'volume', icon: '📊', title: '거래량', prompt: '거래량을 분석해줘' },
-      { id: 'macd', icon: '📉', title: 'MACD', prompt: 'MACD 지표를 분석해줘' },
-      { id: 'rsi', icon: '⚡', title: 'RSI', prompt: 'RSI 지표를 분석해줘' },
-      { id: 'stoch', icon: '🎯', title: '스토캐스틱', prompt: '스토캐스틱 지표를 분석해줘' },
+      { id: 'trend', icon: '📈', title: '추세 분석', type: 'trend' },
+      { id: 'candle', icon: '🕯️', title: '캔들 패턴', type: 'candle' },
+      { id: 'volume', icon: '📊', title: '거래량', type: 'volume' },
+      { id: 'macd', icon: '📉', title: 'MACD', type: 'macd' },
+      { id: 'rsi', icon: '⚡', title: 'RSI', type: 'rsi' },
+      { id: 'stoch', icon: '🎯', title: '스토캐스틱', type: 'stoch' },
     ];
 
     // ===== 분석 카드 렌더링 =====
@@ -108,10 +108,71 @@
       `).join('');
     }
 
-    // ===== 차트 렌더링 =====
-    let chart = null;
-    let candleSeries = null;
+    // ===== 개별 분석 API 호출 =====
+    async function fetchAnalysis(card, stockData) {
+      const element = document.getElementById(`${card.id}Analysis`);
+      element.textContent = '분석 중...';
+      
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ticker: currentTicker,
+            analysisType: card.type,
+            stockData: stockData
+          })
+        });
 
+        const data = await response.json();
+        
+        if (data.success) {
+          element.textContent = data.analysis;
+        } else {
+          element.textContent = `분석 실패: ${data.error}`;
+        }
+      } catch (error) {
+        element.textContent = `오류: ${error.message}`;
+      }
+    }
+
+    // ===== 종합 의견 분석 =====
+    async function fetchSummaryAnalysis(stockData) {
+      const element = document.getElementById('summaryAnalysis');
+      element.textContent = '종합 의견 생성 중...';
+
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ticker: currentTicker,
+            analysisType: 'summary',
+            stockData: stockData
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          element.textContent = data.analysis;
+        } else {
+          element.textContent = `분석 실패: ${data.error}`;
+        }
+      } catch (error) {
+        element.textContent = `오류: ${error.message}`;
+      }
+    }
+
+    // ===== 모든 분석 실행 =====
+    async function runAllAnalysis(stockData) {
+      await Promise.all([
+        ...ANALYSIS_CARDS.map(card => fetchAnalysis(card, stockData)),
+        fetchSummaryAnalysis(stockData)
+      ]);
+    }
+
+    // ===== 차트 렌더링 =====
     function renderChart(stockData) {
       const container = document.getElementById('chartContainer');
       container.innerHTML = '';
@@ -135,7 +196,10 @@
         },
         timeScale: {
           borderColor: '#334155',
-          timeVisible: true,
+          timeVisible: false,
+        },
+        localization: {
+          locale: 'ko-KR',
         },
       });
 
@@ -148,10 +212,9 @@
         wickDownColor: '#ef4444',
       });
 
-      // 데이터 변환 (Alpha Vantage → Lightweight Charts 형식)
       const chartData = Object.entries(stockData.data)
-        .map(([date, values]) => ({
-          time: date,
+        .map(([dateStr, values]) => ({
+          time: dateStr,
           open: parseFloat(values['1. open']),
           high: parseFloat(values['2. high']),
           low: parseFloat(values['3. low']),
@@ -162,60 +225,46 @@
       candleSeries.setData(chartData);
       chart.timeScale().fitContent();
 
-      // 현재가 및 등락률 업데이트
       if (chartData.length > 0) {
         const latest = chartData[chartData.length - 1];
         const prev = chartData.length > 1 ? chartData[chartData.length - 2] : latest;
         const change = latest.close - prev.close;
         const changePercent = (change / prev.close * 100).toFixed(2);
         
-        document.getElementById('currentPrice').textContent = `${latest.close.toFixed(2)}`;
+        document.getElementById('currentPrice').textContent = `$${latest.close.toFixed(2)}`;
         document.getElementById('currentPrice').className = change >= 0 ? 'text-2xl font-semibold text-green-400 ml-auto' : 'text-2xl font-semibold text-red-400 ml-auto';
         document.getElementById('priceChange').textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)} (${change >= 0 ? '+' : ''}${changePercent}%)`;
         document.getElementById('priceChange').className = change >= 0 ? 'text-green-400' : 'text-red-400';
       }
 
-      // 리사이즈 대응
       window.addEventListener('resize', () => {
         chart.resize(container.clientWidth, 384);
       });
     }
 
-    // ===== 초기화 =====
-    const urlParams = new URLSearchParams(window.location.search);
-    const ticker = urlParams.get('ticker');
+    // ===== 데이터 로드 =====
+    async function loadChartData(ticker) {
+      const container = document.getElementById('chartContainer');
+      container.innerHTML = '<span class="text-gray-500">차트 로딩 중...</span>';
 
-    renderAnalysisCards();
+      try {
+        const stockData = await getDailyData(ticker, 'compact');
 
-    if (ticker) {
-      document.getElementById('tickerName').textContent = ticker;
-
-      // sessionStorage에서 데이터 확인
-      const savedData = sessionStorage.getItem('stockData');
-      
-      if (savedData) {
-        const stockData = JSON.parse(savedData);
-        renderChart(stockData);
-        document.getElementById('companyName').textContent = stockData.meta?.['2. Symbol'] || '';
-      } else {
-        // 데이터 없으면 새로 로드
-        getDailyData(ticker).then(stockData => {
-          if (stockData.success) {
-            renderChart(stockData);
-          } else {
-            document.getElementById('chartContainer').innerHTML = 
-              '<span class="text-red-400">차트 데이터를 불러올 수 없습니다.</span>';
-          }
-        });
+        if (stockData.success) {
+          currentStockData = stockData;
+          renderChart(stockData);
+          runAllAnalysis(stockData);
+        } else {
+          container.innerHTML = `<span class="text-red-400">데이터를 불러올 수 없습니다: ${stockData.error}</span>`;
+        }
+      } catch (error) {
+        container.innerHTML = `<span class="text-red-400">오류: ${error.message}</span>`;
       }
     }
 
     // ===== 검색 기능 =====
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-
     async function handleSearch() {
-      const query = searchInput.value.trim();
+      const query = document.getElementById('searchInput').value.trim();
       if (!query) return;
 
       try {
@@ -230,14 +279,31 @@
       }
     }
 
-    searchInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') handleSearch();
-    });
-    searchBtn.addEventListener('click', handleSearch);
+    // ===== 페이지 로드 시 초기화 =====
+    window.onload = function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const ticker = urlParams.get('ticker');
 
-    // ===== 분석 버튼 이벤트 =====
-    document.getElementById('runAnalysisBtn').addEventListener('click', runAllAnalysis);
-    document.getElementById('runSummaryBtn').addEventListener('click', runSummaryAnalysis);
+      renderAnalysisCards();
+
+      document.getElementById('searchInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleSearch();
+      });
+      document.getElementById('searchBtn').addEventListener('click', handleSearch);
+
+      if (ticker) {
+        currentTicker = ticker;
+        document.getElementById('tickerName').textContent = ticker;
+
+        if (ticker.includes('.KS') || ticker.includes('.KQ') || /^[0-9]{6}$/.test(ticker)) {
+          document.getElementById('chartContainer').innerHTML = 
+            '<span class="text-yellow-400">⚠️ 현재 미국 주식만 지원됩니다. 한국 주식은 추후 지원 예정입니다.</span>';
+          document.getElementById('companyName').textContent = '한국 주식 미지원';
+        } else {
+          loadChartData(ticker);
+        }
+      }
+    };
   </script>
 </body>
 </html>
