@@ -84,6 +84,7 @@
     // ===== 전역 변수 =====
     let chart = null;
     let candleSeries = null;
+    let volumeSeries = null;
     let currentTicker = null;
     let currentStockData = null;
 
@@ -203,6 +204,7 @@
         },
       });
 
+      // 캔들 시리즈
       candleSeries = chart.addCandlestickSeries({
         upColor: '#22c55e',
         downColor: '#ef4444',
@@ -212,6 +214,19 @@
         wickDownColor: '#ef4444',
       });
 
+      // 거래량 시리즈
+      volumeSeries = chart.addHistogramSeries({
+        color: '#26a69a',
+        priceFormat: {
+          type: 'volume',
+        },
+        priceScaleId: '',
+        scaleMargins: {
+          top: 0.8,
+          bottom: 0,
+        },
+      });
+
       const chartData = Object.entries(stockData.data)
         .map(([dateStr, values]) => ({
           time: dateStr,
@@ -219,10 +234,26 @@
           high: parseFloat(values['2. high']),
           low: parseFloat(values['3. low']),
           close: parseFloat(values['4. close']),
+          volume: parseFloat(values['5. volume']),
         }))
         .sort((a, b) => new Date(a.time) - new Date(b.time));
 
-      candleSeries.setData(chartData);
+      // 캔들 데이터
+      candleSeries.setData(chartData.map(d => ({
+        time: d.time,
+        open: d.open,
+        high: d.high,
+        low: d.low,
+        close: d.close,
+      })));
+
+      // 거래량 데이터 (상승: 초록, 하락: 빨강)
+      volumeSeries.setData(chartData.map(d => ({
+        time: d.time,
+        value: d.volume,
+        color: d.close >= d.open ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)',
+      })));
+
       chart.timeScale().fitContent();
 
       if (chartData.length > 0) {
@@ -231,7 +262,7 @@
         const change = latest.close - prev.close;
         const changePercent = (change / prev.close * 100).toFixed(2);
         
-        document.getElementById('currentPrice').textContent = `$${latest.close.toFixed(2)}`;
+        document.getElementById('currentPrice').textContent = `${latest.close.toFixed(2)}`;
         document.getElementById('currentPrice').className = change >= 0 ? 'text-2xl font-semibold text-green-400 ml-auto' : 'text-2xl font-semibold text-red-400 ml-auto';
         document.getElementById('priceChange').textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)} (${change >= 0 ? '+' : ''}${changePercent}%)`;
         document.getElementById('priceChange').className = change >= 0 ? 'text-green-400' : 'text-red-400';
