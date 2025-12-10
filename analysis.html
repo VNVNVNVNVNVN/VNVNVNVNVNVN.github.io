@@ -51,6 +51,11 @@
       
       <!-- 차트 섹션 -->
       <section class="rounded-xl p-6 mb-6" style="background-color: rgba(30, 41, 59, 0.5); border: 1px solid #334155;">
+        <!-- 차트 타입 버튼 -->
+        <div class="flex gap-2 mb-4">
+          <button id="btnChart" class="chart-type-btn px-4 py-2 rounded-lg text-sm font-medium bg-cyan-500 text-white">차트</button>
+          <button id="btnVolume" class="chart-type-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700">거래량</button>
+        </div>
         <div id="chartContainer" class="w-full h-96 rounded-lg flex items-center justify-center" style="background-color: #0f172a;">
           <span class="text-gray-500">차트 로딩 중...</span>
         </div>
@@ -87,6 +92,7 @@
     let volumeSeries = null;
     let currentTicker = null;
     let currentStockData = null;
+    let currentChartType = 'candle';
 
     // ===== 분석 카드 설정 =====
     const ANALYSIS_CARDS = [
@@ -283,7 +289,7 @@
 
         if (stockData.success) {
           currentStockData = stockData;
-          renderChart(stockData);
+          renderChart(stockData, 'candle');
           runAllAnalysis(stockData);
         } else {
           container.innerHTML = `<span class="text-red-400">데이터를 불러올 수 없습니다: ${stockData.error}</span>`;
@@ -316,6 +322,7 @@
       const ticker = urlParams.get('ticker');
 
       renderAnalysisCards();
+      setupChartTypeButtons();
 
       document.getElementById('searchInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleSearch();
