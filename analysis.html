@@ -246,6 +246,10 @@
       if (e.key === 'Enter') handleSearch();
     });
     searchBtn.addEventListener('click', handleSearch);
+
+    // ===== 분석 버튼 이벤트 =====
+    document.getElementById('runAnalysisBtn').addEventListener('click', runAllAnalysis);
+    document.getElementById('runSummaryBtn').addEventListener('click', runSummaryAnalysis);
   </script>
 </body>
 </html>
