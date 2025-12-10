@@ -51,8 +51,13 @@
       
       <!-- 차트 섹션 -->
       <section class="rounded-xl p-6 mb-6" style="background-color: rgba(30, 41, 59, 0.5); border: 1px solid #334155;">
-        <div id="chartContainer" class="w-full rounded-lg" style="background-color: #0f172a; height: 480px;">
-          <span class="text-gray-500">차트 로딩 중...</span>
+        <!-- 캔들 차트 -->
+        <div id="candleContainer" class="w-full rounded-lg mb-1" style="background-color: #0f172a; height: 320px;">
+        </div>
+        <!-- 구분선 -->
+        <div class="w-full h-px bg-gray-600 my-1"></div>
+        <!-- 거래량 차트 -->
+        <div id="volumeContainer" class="w-full rounded-lg" style="background-color: #0f172a; height: 120px;">
         </div>
       </section>
 
@@ -82,7 +87,8 @@
   <script src="alpha_vantage_api_call.js"></script>
   <script>
     // ===== 전역 변수 =====
-    let chart = null;
+    let candleChart = null;
+    let volumeChart = null;
     let candleSeries = null;
     let volumeSeries = null;
     let currentTicker = null;
