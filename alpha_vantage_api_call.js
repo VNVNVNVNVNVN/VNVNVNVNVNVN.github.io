@@ -2,8 +2,7 @@
 // Alpha Vantage API 호출 모듈
 
 const ALPHA_VANTAGE_KEY = 'MJ4U1ESXZ8DURRL3';
-const BASE_URL = 'https://www.alphavantage.co/quer;
-
+const BASE_URL = 'https://www.alphavantage.co/query';
 // 주가 데이터 조회 (일봉)
 async function getDailyData(ticker, outputSize = 'compact') {
   try {
